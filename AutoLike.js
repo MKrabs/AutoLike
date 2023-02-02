@@ -6,7 +6,7 @@ setTimeout(() => {
 
     const intervalId = setInterval(() => {
         let alreadyLiked = likeButton.attributes["aria-pressed"].value;
-        if(alreadyLiked === "true")
+        if (alreadyLiked === "true")
             clearInterval(intervalId);
 
 

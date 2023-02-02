@@ -1,20 +1,19 @@
 {
-
-    "manifest_version": 2,
-    "name": "AutoLike",
-    "version": "1.0",
-
-    "description": "Automatically likes the video you're watching (according to your own whitelist)",
-
-    "icons": {
-        "48": "icons/thumb_up_black.svg"
-    },
-
-    "content_scripts": [
-        {
-            "matches": ["*://*.youtube.com/watch?v=*"],
-            "js": ["AutoLike.js"]
-        }
-    ]
-
+  "manifest_version": 2,
+  "name": "AutoLike",
+  "version": "1.0",
+  "description": "Automatically likes the video you're watching (according to your own whitelist)",
+  "icons": {
+    "48": "icons/thumb_up_black.svg"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.youtube.com/watch?v=*"
+      ],
+      "js": [
+        "AutoLike.js"
+      ]
+    }
+  ]
 }
