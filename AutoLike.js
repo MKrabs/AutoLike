@@ -6,21 +6,25 @@
 // Firefox Add-on: https://addons.mozilla.org/en-US/firefox/addon/autolike/
 
 
-let likeButton, alreadyLiked, timerDiv, countSpan, count, processedVideoIds, url, urlParams, videoId;
+let likeButton, alreadyLiked, timerDiv, countSpan, count, processedVideoIds, channelIds, url, urlParams, videoId;
 
-if (localStorage.getItem("processedVideoIds")) {
-    processedVideoIds = JSON.parse(localStorage.getItem("processedVideoIds"));
-} else {
-    processedVideoIds = [];
-}
+processedVideoIds = localStorage.getItem("processedVideoIds") ? JSON.parse(localStorage.getItem("processedVideoIds")) : [];
+channelIds = localStorage.getItem("channelIds") ? JSON.parse(localStorage.getItem("channelIds")) : [];
 
 
-function clickeLikeButton() {
+function clickedLikeButton() {
     count = 20;
     // noinspection CssInvalidHtmlTagReference
     likeButton = document.querySelector("#segmented-like-button ytd-toggle-button-renderer button");
     timerDiv = document.createElement("div");
     countSpan = document.createElement("span");
+
+    // Hijack the like button hover event
+    likeButton.addEventListener("mouseenter", event => {
+        event.preventDefault();
+        clearInterval(intervalId);
+        timerDiv.remove();
+    });
 
     let intervalId = setInterval(() => {
         alreadyLiked = likeButton.attributes["aria-pressed"].value === "true";
@@ -34,7 +38,6 @@ function clickeLikeButton() {
         timerDiv.style.marginLeft = "8px";
 
         countSpan.classList.add("published-time-text", "style-scope", "ytd-comment-renderer");
-        countSpan.role = "text";
         countSpan.textContent = count.toString();
 
         timerDiv.appendChild(countSpan);
@@ -64,9 +67,28 @@ function currentVideoAlreadyProcessed() {
 }
 
 
+function findCurrentChannel() {
+    let link = document.querySelector('#owner a').href;
+
+    const channelRegex = /channel\/([\w.-]+)/i;
+    const tagRegex = /@([\w.-]+)/i;
+    const shortchangeRegex = /c\/([\w.-]+)/i;
+
+    return link.match(channelRegex)?.[1] || link.match(tagRegex)?.[1] || link.match(shortchangeRegex)?.[1] || "";
+}
+
+function channelIncluded() {
+    let channel = findCurrentChannel();
+    return channelIds.includes(channel) ? channel : null;
+}
+
+
 setTimeout(() => {
-    if (!currentVideoAlreadyProcessed())
-        clickeLikeButton();
+    const channel = channelIncluded();
+    if (channel !== null && !currentVideoAlreadyProcessed()) {
+        clickedLikeButton();
+    }
 }, 5000);
+
 
 

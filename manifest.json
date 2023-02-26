@@ -21,7 +21,15 @@
     "page": "pages/options.html"
   },
 
-  "permissions": ["storage"],
+  "browser_action": {
+    "browser_style": true,
+    "default_popup": "pages/menu.html",
+    "default_icon": {
+      "16": "icons/thumb_up_white.svg"
+    }
+  },
+
+  "permissions": ["storage", "activeTab"],
 
   "browser_specific_settings": {
     "gecko": {
