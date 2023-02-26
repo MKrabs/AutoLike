@@ -9,10 +9,12 @@
 let likeButton, alreadyLiked, timerDiv, countSpan, processedVideoIds, channelIds, url, urlParams, videoId;
 
 const prefix = "[AutoLike]";
+let timebeforescript = 5000;
+let timebetweenupdates = 10000;
 
 
 function clickedLikeButton() {
-    let count = 20;
+    let count = 30;
     // noinspection CssInvalidHtmlTagReference
     likeButton = document.querySelector("#segmented-like-button ytd-toggle-button-renderer button");
     timerDiv = document.createElement("div");
@@ -104,8 +106,8 @@ setTimeout(() => {
         if (channelIncluded() && !currentVideoAlreadyProcessed()) {
             clickedLikeButton();
         }
-    }, 5000);
-}, 1000);
+    }, timebetweenupdates);
+}, timebeforescript);
 
 
 
