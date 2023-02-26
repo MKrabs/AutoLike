@@ -6,14 +6,13 @@
 // Firefox Add-on: https://addons.mozilla.org/en-US/firefox/addon/autolike/
 
 
-let likeButton, alreadyLiked, timerDiv, countSpan, count, processedVideoIds, channelIds, url, urlParams, videoId;
+let likeButton, alreadyLiked, timerDiv, countSpan, processedVideoIds, channelIds, url, urlParams, videoId;
 
-processedVideoIds = localStorage.getItem("processedVideoIds") ? JSON.parse(localStorage.getItem("processedVideoIds")) : [];
-channelIds = localStorage.getItem("channelIds") ? JSON.parse(localStorage.getItem("channelIds")) : [];
+const prefix = "[AutoLike]";
 
 
 function clickedLikeButton() {
-    count = 20;
+    let count = 20;
     // noinspection CssInvalidHtmlTagReference
     likeButton = document.querySelector("#segmented-like-button ytd-toggle-button-renderer button");
     timerDiv = document.createElement("div");
@@ -22,8 +21,11 @@ function clickedLikeButton() {
     // Hijack the like button hover event
     likeButton.addEventListener("mouseenter", event => {
         event.preventDefault();
-        clearInterval(intervalId);
-        timerDiv.remove();
+        if(intervalId) {
+            console.debug(`${prefix} Countdown manually stopped! %c⚠`, `color: orange;`);
+            clearInterval(intervalId);
+            timerDiv.remove();
+        }
     });
 
     let intervalId = setInterval(() => {
@@ -46,6 +48,7 @@ function clickedLikeButton() {
         if (count === 0) {
             clearInterval(intervalId);
             likeButton.click();
+            console.debug(`${prefix} Liked video!`);
         }
 
         count--;
@@ -58,9 +61,11 @@ function currentVideoAlreadyProcessed() {
     videoId = urlParams.get("v");
 
     if (processedVideoIds.includes(videoId)) {
+        console.debug(`${prefix} Video already processed! %c✘`, `color: red;`);
         return true;
     }
 
+    console.debug(`${prefix} Video ${videoId} not processed yet! %c✔`, `color: green;`);
     processedVideoIds.push(videoId);
     localStorage.setItem("processedVideoIds", JSON.stringify(processedVideoIds));
     return false;
@@ -79,16 +84,28 @@ function findCurrentChannel() {
 
 function channelIncluded() {
     let channel = findCurrentChannel();
-    return channelIds.includes(channel) ? channel : null;
+    if (channelIds.includes(channel)) {
+        console.debug(`${prefix} Channel %c${channel} %cincluded! %c✔`, `color: blue;`, `color: inherit;`, `color: green;`);
+        return channel;
+    } else {
+        console.debug(`${prefix} Channel %c${channel} %cnot included! %c✘`, `color: blue;`, `color: inherit;`, `color: red;`);
+        return null;
+    }
 }
 
 
 setTimeout(() => {
-    const channel = channelIncluded();
-    if (channel !== null && !currentVideoAlreadyProcessed()) {
-        clickedLikeButton();
-    }
-}, 5000);
+    let watcher = setInterval(() => {
+        console.debug(`${prefix} Watching for videos to like...`);
+
+        processedVideoIds = localStorage.getItem("processedVideoIds") ? JSON.parse(localStorage.getItem("processedVideoIds")) : [];
+        channelIds = localStorage.getItem("channelIds") ? JSON.parse(localStorage.getItem("channelIds")) : [];
+
+        if (channelIncluded() && !currentVideoAlreadyProcessed()) {
+            clickedLikeButton();
+        }
+    }, 5000);
+}, 1000);
 
 
 

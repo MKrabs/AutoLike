@@ -14,7 +14,7 @@ function updateChannels() {
         .then(tabs => {
             // Execute a script in the context of the current tab
             return browser.tabs.executeScript(tabs[0].id, {
-                code: "JSON.parse(window.localStorage.getItem('channelIds'))"
+                code: "JSON.parse(window.localStorage.getItem('channelIds'));"
             });
         })
         .then(result => {
@@ -32,8 +32,6 @@ function upgradeChannels() {
         channelIds.push(currentChannel);
     }
 
-    updateChannels();
-
     str = JSON.stringify(channelIds);
     browser.tabs.query({active: true, currentWindow: true})
         .then(tabs => {
@@ -43,6 +41,7 @@ function upgradeChannels() {
         })
         .then(_ => {
             updateChannels();
+            getCurrentChannel();
         });
 }
 
@@ -52,13 +51,21 @@ function getCurrentChannel() {
         .then(tabs => {
             // Execute a script in the context of the current tab
             return browser.tabs.executeScript(tabs[0].id, {
-                code: "findCurrentChannel()"
+                code: "findCurrentChannel();"
             });
         })
         .then(result => {
             currentChannel = result[0];
             currentChannelName.textContent = currentChannel;
-            currentChannelAction.textContent = channelIds.includes(currentChannel) ? "Remove" : "Add";
+            if (channelIds.includes(currentChannel)) {
+                currentChannelAction.textContent = "Remove";
+                currentChannelAction.classList.add("channel-remove");
+                currentChannelAction.classList.remove("channel-add");
+            } else {
+                currentChannelAction.textContent = "Add";
+                currentChannelAction.classList.add("channel-add");
+                currentChannelAction.classList.remove("channel-remove");
+            }
         });
 }
 
@@ -95,3 +102,7 @@ currentChannels.addEventListener("click", () => {
 
 updateChannels();
 getCurrentChannel();
+
+
+let darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+console.log(darkMode);

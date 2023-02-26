@@ -3,57 +3,94 @@ body {
     width: 300px;
 }
 
+#title {
+    background: #000000;
+    color: white;
+}
+
+.Author {
+    font-size: 0.75em;
+    font-style: italic;
+    color: #efefef;
+}
+.Author a{
+    text-decoration: none;
+    color: #abd7ff;
+}
+
+#current-channels {
+    font-size:1em;
+}
+
 .page-choice {
     width: 100%;
     padding: 4px;
     font-size: 1.5em;
     text-align: center;
-    cursor: pointer;
 }
-
 .page-choice:hover {
-    background-color: #cff2f2;
-}
-
-.channel-list {
-    max-height: 500px;
-    overflow-y: scroll;
-    scrollbar-width: none;
-}
-
-.channel-item {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px;
-}
-
-.channel-item:hover {
     background-color: #fafafa;
 }
 
-.channel-item .channel-name {
-    font-size: 1.2em;
-    font-weight: bold;
+.channel-list {
+    max-height: 223px;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    background: rgba(0, 0, 0, 0.02);
 }
 
-.channel-item .remove-channel {
-    cursor: pointer;
-    margin-left: 10px;
+.channel-item, .settings-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
+.settings-item {
+    padding: 5px;
+}
+
+.channel-name {
+    padding: 5px;
+    width: 100%;
+}
+.channel-name:hover {
+    background-color: rgba(255, 196, 0, 0.27);
+}
 
 .remove-channel {
     color: red;
     font-size: 1.5em;
+    height: fit-content;
+    padding: 0 5px;
 }
-
 .remove-channel:hover {
     background-color: rgba(255, 0, 0, 0.49);
+    color: white;
     cursor: pointer;
 }
 
-.channel-action {
+.channel-remove {
+    color: red;
+    height: fit-content;
+    padding: 5px;
+}
+.channel-remove:hover {
+    background-color: rgba(255, 202, 202, 0.49);
+    cursor: pointer;
+}
+.channel-add {
+    color: green;
+    height: fit-content;
+    padding: 5px;
+}
+.channel-add:hover {
+    background-color: rgba(202, 255, 202, 0.49);
+    cursor: pointer;
+}
 
+hr {
+    width:50%;
+    margin: 8px auto;
+    color: #efefef;
+    border-radius: 25px;
 }
