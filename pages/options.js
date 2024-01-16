@@ -1,7 +1,7 @@
 function saveOptions(e) {
     e.preventDefault();
     browser.storage.sync.set({
-        color: document.querySelector("#color").value
+        timebeforescript: document.querySelector("#timebeforescript").value
     });
 }
 
@@ -14,7 +14,7 @@ function restoreOptions() {
         console.log(`Error: ${error}`);
     }
 
-    let getting = browser.storage.sync.get("color");
+    let getting = browser.storage.sync.get("timebeforescript");
     getting.then(setCurrentChoice, onError);
 }
 

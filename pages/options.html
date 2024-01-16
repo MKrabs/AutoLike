@@ -2,12 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <title>AL - options</title>
+    <title>AutoLike - options</title>
 </head>
 
 <body>
 <form>
-    <label>Border color <input id="color" name="color" type="text"/></label>
+    <label>
+        Time before script runs (in miliseconds) 
+        <input
+        id="timebeforescript"
+        name="timebeforescript"
+        type="number"
+        min="0"
+        max="100000"
+        step="500"
+        placeholder="2500"/>
+    </label>
     <button type="submit">Save</button>
 </form>
 
