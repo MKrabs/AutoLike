@@ -68,6 +68,27 @@ class ChannelManager {
     }
 }
 
+const waitForElement = (selector, callback, timeout = 5000, tries = 3) => {
+    const observer = new MutationObserver((mutations, me) => {
+        const element = document.querySelector(selector);
+        if(!element)
+            return;
+        callback(element);
+        me.disconnect();
+    });
+
+    observer.observe(document, { childList: true, subtree: true });
+
+    setTimeout(() => {
+        if(tries === 0) {
+            console.debug(`${this.prefix} Element not found: ${selector}`);
+            return;
+        }
+        tries--;
+        waitForElement(selector, callback, timeout, tries);
+    }, timeout);
+}
+
 // Instantiate the addon
 const autoLikeAddon = new AutoLikeAddon();
 autoLikeAddon.run();
