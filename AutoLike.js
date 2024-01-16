@@ -5,21 +5,37 @@
 // Repository: www.github.com/Mkrabs/AutoLike
 // Firefox Add-on: https://addons.mozilla.org/en-US/firefox/addon/autolike/
 
+const prefix = "[AutoLike]";
+let timebeforescript = 1000;
+let timebetweenupdates = 10000;
 
 class AutoLikeAddon {
     constructor() {
-        this.prefix = "[AutoLike]";
-        this.syncStorage = new SyncManager();
-        this.videoManager = new VideoManager();
         this.channelManager = new ChannelManager();
-        this.init();
     }
 
     init() {
-        console.debug(`${this.prefix} Initializing...`);
-        this.syncStorage.getStorageValues();
+        console.debug(`${prefix} Initializing...`);
+        this.delay(timebeforescript).then(() => {
+            this.startWatching();
+        });
     }
 
+    async delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    startWatching() {
+        this.watcher = setInterval(async () => {
+            if (this.channelManager.isChannelIncluded() && !this.channelManager.videoAlreadyProcessed())
+                this.channelManager.likeVideo();
+        }, timebetweenupdates);
+    }
+
+    stopWatching() {
+        console.debug(`${prefix} Stopping.`);
+        clearInterval(this.watcher);
+    }
 }
 
 class SyncManager {
@@ -30,7 +46,8 @@ class SyncManager {
     }
 
     getStorageValues() {
-        console.debug(`${autoLikeAddon.prefix} Getting storage values...`);
+        console.debug(`${prefix} Getting storage values`);
+        console.debug(this.getSyncParameter("timebeforescript"));
         this.getChannelIds();
         this.getProcessedVideoIds();
     }
@@ -45,23 +62,59 @@ class SyncManager {
     }
 
     setStorageValues() {
-        console.debug(`${autoLikeAddon.prefix} Setting storage values...`);
+        console.debug(`${prefix} Setting storage values`);
         this.setChannelIds();
         this.setProcessedVideoIds();
     }
 
     setChannelIds() {
-        browser.storage.sync.set({ channelIds: this.channelIds });
+        this.setSyncParameter("channelIds");
     }
 
     setProcessedVideoIds() {
         localStorage.setItem("processedVideoIds", JSON.stringify(this.processedVideoIds));
     }
+
+    async getSyncParameter(parameter) {
+        function onSuccess(result) {
+            console.error(`${prefix} Error: ${error}`);
+            return {[parameter]: result[parameter]};
+        }
+
+        function onError(error) {
+            console.error(`${prefix} Error: ${error}`);
+        }
+
+        return await browser.storage.sync.get(parameter).then(onSuccess, onError);
+    }
+
+    setSyncParameter(parameter, value) {
+        const dict = {[parameter]: value};
+
+        try {
+            browser.storage.sync.set(dict);
+            return dict;
+        } catch (error) {
+            console.error(`${prefix} Error: ${error}`);
+        }
+    }
 }
 
-class VideoManager {
+class FrontendManager {
+    #channelRegex = /channel\/([\w.-]+)/i;
+    #tagRegex = /@([\w.-]+)/i;
+    #shortchangeRegex = /c\/([\w.-]+)/i;
+
     constructor() {
         // Add any necessary properties here
+    }
+
+    findCurrentChannel() {
+        let link = document.querySelector('#owner a').href.toString();
+        return link.match(this.#channelRegex)?.[1]
+            || link.match(this.#tagRegex)?.[1]
+            || link.match(this.#shortchangeRegex)?.[1]
+            || "";
     }
 
     watchForMouseHover() {
@@ -75,19 +128,55 @@ class VideoManager {
     addToBlacklist() {
         // Implementation here
     }
+
+    getVideoId() {
+        url = window.location.href;
+        urlParams = new URLSearchParams(url.split("?")[1]);
+        return urlParams.get("v");
+    }
 }
 
 class ChannelManager {
     constructor() {
-        // Add any necessary properties here
+        this.frontendManager = new FrontendManager();
+        this.syncStorage = new SyncManager();
     }
 
-    findCurrentChannel() {
-        // Implementation here
+
+    isChannelIncluded(channel = null) {
+        console.debug(`${prefix} Checking if channel is included`);
+        try {
+            let channelToFind = channel || findCurrentChannel();
+        } catch (error) {
+            console.error(`${prefix} Error: ${error}`);
+            return false;
+        }
+        console.debug(`${prefix} Channel to find: ${channelToFind}`);
+        if (this.syncStorage.channelIds.includes(channelToFind)) {
+            console.debug(`${prefix} Channel %c${channelToFind} %cincluded! %c✔`, `color: blue;`, `color: inherit;`, `color: green;`);
+            return channelToFind;
+        }
+
+        console.debug(`${prefix} Channel %c${channelToFind} %cnot included! %c✘`, `color: blue;`, `color: inherit;`, `color: red;`);
+        return null;
     }
 
-    channelIncluded() {
-        // Implementation here
+    videoAlreadyProcessed() {
+        const videoId = this.frontendManager.getVideoId();
+
+        if (this.syncStorage.processedVideoIds.includes(videoId)) {
+            console.debug(`${prefix} Video already processed! %c✘`, `color: red;`);
+            return true;
+        }
+
+        console.debug(`${prefix} Video ${videoId} not processed yet! %c✔`, `color: green;`);
+        this.syncStorage.processedVideoIds.push(videoId);
+        localStorage.setItem("processedVideoIds", JSON.stringify(this.syncStorage.processedVideoIds));
+        return false;
+    }
+
+    likeVideo() {
+
     }
 }
 
@@ -104,7 +193,7 @@ const waitForElement = (selector, callback, timeout = 5000, tries = 3) => {
 
     setTimeout(() => {
         if(tries === 0) {
-            console.debug(`${this.prefix} Element not found: ${selector}`);
+            console.debug(`${prefix} Element not found: ${selector}`);
             return;
         }
         tries--;
@@ -114,4 +203,4 @@ const waitForElement = (selector, callback, timeout = 5000, tries = 3) => {
 
 // Instantiate the addon
 const autoLikeAddon = new AutoLikeAddon();
-autoLikeAddon.run();
+autoLikeAddon.init();

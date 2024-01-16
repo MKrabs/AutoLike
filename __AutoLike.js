@@ -81,6 +81,8 @@ function findCurrentChannel() {
     const tagRegex = /@([\w.-]+)/i;
     const shortchangeRegex = /c\/([\w.-]+)/i;
 
+    console.debug(`${prefix} Channel link: ${link}`);
+
     return link.match(channelRegex)?.[1] || link.match(tagRegex)?.[1] || link.match(shortchangeRegex)?.[1] || "";
 }
 
