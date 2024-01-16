@@ -30,9 +30,32 @@ class SyncManager {
     }
 
     getStorageValues() {
+        console.debug(`${autoLikeAddon.prefix} Getting storage values...`);
+        this.getChannelIds();
+        this.getProcessedVideoIds();
+    }
+
+    getChannelIds() {
+        this.channelIds = browser.storage.sync.get("channelIds");
+    }
+
+    getProcessedVideoIds() {
+        const storedVideoIds = localStorage.getItem("processedVideoIds");
+        this.processedVideoIds = storedVideoIds ? JSON.parse(storedVideoIds) : [];
     }
 
     setStorageValues() {
+        console.debug(`${autoLikeAddon.prefix} Setting storage values...`);
+        this.setChannelIds();
+        this.setProcessedVideoIds();
+    }
+
+    setChannelIds() {
+        browser.storage.sync.set({ channelIds: this.channelIds });
+    }
+
+    setProcessedVideoIds() {
+        localStorage.setItem("processedVideoIds", JSON.stringify(this.processedVideoIds));
     }
 }
 
